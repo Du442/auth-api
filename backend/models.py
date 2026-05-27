@@ -1,7 +1,8 @@
-from sqlalchemy import String, Integer, Column
+from sqlalchemy import String
 from sqlalchemy.orm import declarative_base, Mapped, mapped_column
 from sqlalchemy.ext.hybrid import hybrid_property
 from passlib.context import CryptContext
+import db
 
 Base = declarative_base()
 
