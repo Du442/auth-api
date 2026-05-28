@@ -4,9 +4,10 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
+from pydantic import EmailStr
 from db import get_db
 from models import User
-from schemas import UserLoginSchema
+from schemas import UserLoginSchema, UserCreateSchema, UserResponseSchema
 import jwt, os
 
 
@@ -41,7 +42,7 @@ async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
 async def read_users(usuario_atual: User = Depends(get_current_user)):
     return {"email_logado": usuario_atual.mail, "role": usuario_atual.role}
 
-@app.post("/auth/login")
+@app.post("/auth/login", response_model=UserLoginSchema)
 def login(dados_login: UserLoginSchema, db: Session = Depends(get_db)):
 
     # busca o usuário no banco pelo e-mail
@@ -61,3 +62,20 @@ def login(dados_login: UserLoginSchema, db: Session = Depends(get_db)):
     token_gerado = jwt.encode(dados_do_payload, secret_key, algorithm="HS256")
 
     return {"access_token": token_gerado, "token_type": "bearer"}
+
+@app.post("/auth/register", response_model=UserResponseSchema)
+def register(registro: UserCreateSchema, db: Session = Depends(get_db)):
+
+    user = db.query(User).filter(User.mail == registro.email).first()
+
+    if user:
+        raise HTTPException(status_code=400, detail="Usuário já existente.")
+
+    novo_usuario = User(username=registro.username, mail=registro.email)
+    novo_usuario.password = registro.password
+
+    db.add(novo_usuario)
+    db.commit()
+    db.refresh(novo_usuario)
+
+    return novo_usuario

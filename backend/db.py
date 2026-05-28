@@ -7,9 +7,6 @@ engine = create_engine("sqlite:///./sql_app.db", echo=True)
 
 Session = sessionmaker(bind=engine)
 
-with Session() as session:
-    results = session.query(User).all()
-
 async def get_db():
     db = Session()
     try:
