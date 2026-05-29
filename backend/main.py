@@ -1,13 +1,23 @@
 from typing import Annotated
 from fastapi import Depends, FastAPI, HTTPException
+<<<<<<< HEAD
 from fastapi.security import OAuth2PasswordBearer
+=======
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+>>>>>>> bugfix
 from sqlalchemy.orm import Session
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 from pydantic import EmailStr
+<<<<<<< HEAD
 from db import get_db
 from models import User
 from schemas import UserLoginSchema, UserCreateSchema, UserResponseSchema
+=======
+from db import get_db, engine
+from models import User, Base
+from schemas import UserLoginSchema, UserCreateSchema, UserResponseSchema, TokenSchema
+>>>>>>> bugfix
 import jwt, os
 
 
@@ -15,6 +25,11 @@ load_dotenv()
 
 secret_key = os.getenv("SECRET_KEY")
 
+<<<<<<< HEAD
+=======
+Base.metadata.create_all(bind=engine)
+
+>>>>>>> bugfix
 app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
@@ -42,11 +57,19 @@ async def read_items(token: Annotated[str, Depends(oauth2_scheme)]):
 async def read_users(usuario_atual: User = Depends(get_current_user)):
     return {"email_logado": usuario_atual.mail, "role": usuario_atual.role}
 
+<<<<<<< HEAD
 @app.post("/auth/login", response_model=UserLoginSchema)
 def login(dados_login: UserLoginSchema, db: Session = Depends(get_db)):
 
     # busca o usuário no banco pelo e-mail
     user = db.query(User).filter(User.mail == dados_login.email).first()
+=======
+@app.post("/auth/login", response_model=TokenSchema)
+def login(dados_login: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+
+    # busca o usuário no banco pelo e-mail
+    user = db.query(User).filter(User.mail == dados_login.username).first()
+>>>>>>> bugfix
 
     # se o usuário existir, usa o metodo da classe para verificar a senha
     if not user or not user.verify_password(dados_login.password):
@@ -66,12 +89,20 @@ def login(dados_login: UserLoginSchema, db: Session = Depends(get_db)):
 @app.post("/auth/register", response_model=UserResponseSchema)
 def register(registro: UserCreateSchema, db: Session = Depends(get_db)):
 
+<<<<<<< HEAD
     user = db.query(User).filter(User.mail == registro.email).first()
+=======
+    user = db.query(User).filter(User.mail == registro.mail).first()
+>>>>>>> bugfix
 
     if user:
         raise HTTPException(status_code=400, detail="Usuário já existente.")
 
+<<<<<<< HEAD
     novo_usuario = User(username=registro.username, mail=registro.email)
+=======
+    novo_usuario = User(username=registro.username, mail=registro.mail)
+>>>>>>> bugfix
     novo_usuario.password = registro.password
 
     db.add(novo_usuario)

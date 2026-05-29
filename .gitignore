@@ -1,3 +1,9 @@
 \.venv 
+<<<<<<< HEAD
 \.env
 \backend
+=======
+.env
+backend/__pycache__/
+backend/sql_app.db
+>>>>>>> bugfix
